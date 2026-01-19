@@ -1,8 +1,8 @@
 # PFC (Product Feature Components) for Shopify
 
-A modular set of Shopify Liquid snippets, vanilla JavaScript, and CSS for building product-focused Shopify experiences without external dependencies.
+PFC is a modular set of Shopify Liquid snippets, vanilla JavaScript, and CSS for building product-focused Shopify experiences without external dependencies.
 
-PFC is designed for products that are sold by **unit, m², package, or set** and require advanced pricing logic, calculators, and structured product information.
+It is designed for products sold by **unit, m², package, or set** and supports advanced pricing logic, calculators, and structured product data.
 
 ---
 
@@ -19,10 +19,10 @@ It is especially useful for complex products such as flooring, tiles, building m
 
 - Package / m² calculator with waste %, totals, and optional currency conversion
 - Product gallery with thumbnails, zoom, and badge support
-- Metafields-driven specifications (desktop + mobile layouts)
-- Sample flow (links and popup box)
-- Upsell slider driven by metafields
-- No external libraries or apps required
+- Metafields-driven specifications (desktop and mobile layouts)
+- Sample flow with links and popup box
+- Upsell slider driven entirely by metafields
+- No external libraries or Shopify apps required
 
 ---
 
@@ -31,17 +31,17 @@ It is especially useful for complex products such as flooring, tiles, building m
 - Shopify developers building custom product templates
 - Shopify agencies creating reusable component systems
 - Technical product owners in e-commerce
-- Stores that need precise unit-based pricing logic
+- Stores that require precise unit-based pricing logic
 
 ---
 
 ## Features
 
 - Calculator with package sizing, waste option, totals, and optional EUR conversion
-- Product gallery with zoom, navigation, thumbnails, and badge support
-- Desktop and mobile metafields display with automatic specifications list
+- Product gallery with zoom, navigation, thumbnails, and badges
+- Desktop and mobile metafields display with automatic specification lists
 - Sample link with optional banner and popup flow
-- Upsell products slider driven by metafields
+- Upsell products slider driven by product or collection metafields
 
 ---
 
@@ -86,16 +86,16 @@ It is especially useful for complex products such as flooring, tiles, building m
   Zoom modal markup
 
 - `snippets/pfc-metafields-desktop.liquid`  
-  Metafields display (desktop)
+  Metafields display for desktop
 
 - `snippets/pfc-metafields-mobile.liquid`  
-  Metafields display (mobile)
+  Metafields display for mobile
 
 - `snippets/pfc-sample-box.liquid`  
   Sample banner and popup UI
 
 - `snippets/pfc-sample-link.liquid`  
-  Sample link logic
+  Sample link logic and output
 
 - `snippets/pfc-upsell-slider.liquid`  
   Upsell products slider
@@ -120,7 +120,7 @@ It is especially useful for complex products such as flooring, tiles, building m
 
 ## Required Metafields (Overview)
 
-All metafields are optional unless your design depends on them.
+All metafields are optional unless your design or logic depends on them.
 
 ### Namespace: `custom`
 - `calculator_package_size`
@@ -169,7 +169,7 @@ All metafields are optional unless your design depends on them.
 
 ## Configuration Overview
 
-Common section settings used across the components:
+Common section settings used across PFC components:
 
 ### Labels
 - `cta_label`
@@ -201,7 +201,7 @@ Common section settings used across the components:
 - `show_sample_button`
 - `show_virtual_button`
 
-### Metafields
+### Metafields display
 - `show_metafields`
 - `auto_show_all_metafields`
 - `show_empty_metafields`
@@ -216,4 +216,8 @@ Common section settings used across the components:
 
 ## License
 
-MIT
+MIT License
+
+This project is released under the MIT License.  
+You are free to use, modify, and distribute the code, including for commercial projects, as long as the original copyright notice is retained.
+
