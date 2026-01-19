@@ -1,0 +1,73 @@
+<div class="pfc-complete-set__product">
+  {% if p != blank and p.featured_image %}
+    <img src="{{ p.featured_image | image_url: width: 100 }}" alt="{% if p != blank %}{{ p.title | escape }}{% endif %}" width="60" height="60" class="pfc-complete-set__product-img" loading="lazy" decoding="async">
+  {% elsif section.settings.placeholder_image != blank %}
+    <img src="{{ section.settings.placeholder_image | image_url: width: 100 }}" alt="" width="60" height="60" class="pfc-complete-set__product-img" loading="lazy" decoding="async">
+  {% endif %}
+  <div class="pfc-complete-set__product-info">
+    <div class="pfc-complete-set__product-title">
+      {% if section.settings.custom_title != blank %}
+        {{ section.settings.custom_title }}
+      {% elsif p != blank %}
+        {{ p.title }}
+      {% endif %}
+    </div>
+    <div class="pfc-complete-set__price">
+      {% if p != blank and current_variant != blank %}
+        {% comment %} Use variant.unit_price if available, otherwise calculate from price {% endcomment %}
+        {% if current_variant.unit_price != blank and current_variant.unit_price > 0 %}
+          {% assign price_per_m2_bgn = current_variant.unit_price | divided_by: 100.0 %}
+        {% else %}
+          {% assign price_per_m2_bgn = current_variant.price | divided_by: 100.0 | divided_by: calc_package_size %}
+        {% endif %}
+        {% if current_variant.compare_at_price > current_variant.price %}
+          {% if current_variant.unit_price_measurement != blank and current_variant.unit_price_measurement.quantity_value > 0 %}
+            {% assign compare_price_per_m2_bgn = current_variant.compare_at_price | divided_by: current_variant.unit_price_measurement.quantity_value | divided_by: 100.0 %}
+          {% else %}
+            {% assign compare_price_per_m2_bgn = current_variant.compare_at_price | divided_by: 100.0 | divided_by: calc_package_size %}
+          {% endif %}
+          <span class="pfc-complete-set__price-compare" id="pfc-set-price-compare-{{ section.id }}">
+            {% if section.settings.enable_currency_conversion and section.settings.show_eur_alongside_bgn %}
+              {% assign eur_rate = section.settings.eur_to_bgn_rate | default: "1.95583" | plus: 0.0 %}
+              {% assign compare_price_eur = compare_price_per_m2_bgn | divided_by: eur_rate | round: 2 %}
+              {% assign eur_str = compare_price_eur | append: '' %}
+              {% if eur_str contains '.' %}
+                {% assign eur_parts = eur_str | split: '.' %}
+                {% assign dec = eur_parts[1] %}
+                {% if dec.size == 1 %}{% assign dec = dec | append: '0' %}{% endif %}
+                {% assign eur_str = eur_parts[0] | append: '.' | append: dec %}
+              {% else %}
+                {% assign eur_str = eur_str | append: '.00' %}
+              {% endif %}
+              <span class="pfc-price-eur">{{ eur_str }}€</span>/{{ calc_unit_label }}-{{ compare_price_per_m2_bgn | round: 2 }} лв/{{ calc_unit_label }}
+            {% else %}
+              {{ compare_price_per_m2_bgn | round: 2 }} лв/{{ calc_unit_label }}
+            {% endif %}
+          </span>
+        {% endif %}
+          <span class="pfc-complete-set__price-current" id="pfc-set-price-{{ section.id }}">
+            {% if section.settings.enable_currency_conversion and section.settings.show_eur_alongside_bgn %}
+              {% assign eur_rate = section.settings.eur_to_bgn_rate | default: "1.95583" | plus: 0.0 %}
+              {% assign price_eur = price_per_m2_bgn | divided_by: eur_rate | round: 2 %}
+              {% assign eur_str = price_eur | append: '' %}
+              {% if eur_str contains '.' %}
+                {% assign eur_parts = eur_str | split: '.' %}
+                {% assign dec = eur_parts[1] %}
+                {% if dec.size == 1 %}{% assign dec = dec | append: '0' %}{% endif %}
+                {% assign eur_str = eur_parts[0] | append: '.' | append: dec %}
+              {% else %}
+                {% assign eur_str = eur_str | append: '.00' %}
+              {% endif %}
+              <span class="pfc-price-eur">{{ eur_str }}€</span>/{{ calc_unit_label }}-{{ price_per_m2_bgn | round: 2 }} лв/{{ calc_unit_label }}
+            {% else %}
+              {{ price_per_m2_bgn | round: 2 }} лв/{{ calc_unit_label }}
+            {% endif %}
+            <br><small>Package price: {% if section.settings.enable_currency_conversion and section.settings.show_eur_alongside_bgn %}{% assign eur_rate = section.settings.eur_to_bgn_rate | default: "1.95583" | plus: 0.0 %}{% assign package_price_bgn = current_variant.price | divided_by: 100.0 %}{% assign package_price_eur = package_price_bgn | divided_by: eur_rate | round: 2 %}{% assign eur_str = package_price_eur | append: '' %}{% if eur_str contains '.' %}{% assign eur_parts = eur_str | split: '.' %}{% assign dec = eur_parts[1] %}{% if dec.size == 1 %}{% assign dec = dec | append: '0' %}{% endif %}{% assign eur_str = eur_parts[0] | append: '.' | append: dec %}{% else %}{% assign eur_str = eur_str | append: '.00' %}{% endif %}<span class="pfc-price-eur">{{ eur_str }}€</span> / {{ current_variant.price | money }}{% else %}{{ current_variant.price | money }}{% endif %}</small>
+        </span>
+      {% elsif section.settings.manual_price != blank %}
+        <span class="pfc-complete-set__price-current">{{ section.settings.manual_price }}</span>
+      {% endif %}
+    </div>
+  </div>
+</div>
+

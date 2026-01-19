@@ -1,0 +1,56 @@
+{% comment %} Black sample banner - shown ONLY if sample_black_banner = true {% endcomment %}
+{% comment %} TEMP TEST: Show banner if there is a sample_product and sample_black_banner is not false {% endcomment %}
+{% assign test_banner = false %}
+{% if sample_product != blank and product.metafields.custom.sample_black_banner != false %}
+  {% assign test_banner = true %}
+{% endif %}
+{% if test_banner %}
+<div class="sample-box" id="sample-box-{{ section.id }}" data-sample-box style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+  <div class="sample-box__inner">
+    <div class="sample-box__icon">📦</div>
+    <div class="sample-box__content">
+      <div class="sample-box__label">Free sample</div>
+      <div class="sample-box__title">
+        See the decor in real life before ordering the full flooring.
+      </div>
+      <div class="sample-box__text">
+        Add a sample of this decor to your cart. Maximum {{ sample_limit }} different samples per order.
+      </div>
+
+      <form method="post"
+            action="{{ routes.cart_add_url }}"
+            class="sample-box__form"
+            data-sample-form>
+        <input type="hidden" name="id" value="{{ sample_product.selected_or_first_available_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="sample-box__btn">
+          Order free sample
+        </button>
+      </form>
+
+      <a href="{{ sample_product.url }}" class="sample-box__link">
+        View sample details
+      </a>
+    </div>
+  </div>
+
+  <div class="sample-box__overlay" data-sample-overlay></div>
+  <div class="sample-box__popup" data-sample-popup aria-hidden="true">
+    <div class="sample-box__popup-inner">
+      <div class="sample-box__popup-title">Sample added to cart</div>
+      <div class="sample-box__popup-text">
+        You can add up to {{ sample_limit }} different samples to one order.
+      </div>
+      <div class="sample-box__popup-actions">
+        <button type="button" class="sample-box__popup-close" data-sample-close>
+          Continue browsing
+        </button>
+        <a href="{{ routes.cart_url }}" class="sample-box__popup-cart">
+          Go to cart
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+

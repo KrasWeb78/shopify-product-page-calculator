@@ -1,0 +1,138 @@
+{% assign accordion_blocks = section.blocks | where: 'type', 'accordion' %}
+{% if accordion_blocks.size > 0 %}
+  <div class="pfc-accordion">
+    {% for block in accordion_blocks %}
+      {% comment %} ===== UNIVERSAL FILTERING LOGIC ===== {% endcomment %}
+      {% assign show_accordion_block = false %}
+      {% assign filter_type = block.settings.filter_type | default: 'any' %}
+      
+      {% comment %} 1. Filter by product {% endcomment %}
+      {% assign product_match = false %}
+      {% if block.settings.target_product != blank and p != blank %}
+        {% assign target_product_handle = block.settings.target_product %}
+        {% assign target_product = all_products[target_product_handle] %}
+        {% if target_product != blank %}
+          {% if target_product.handle == p.handle or target_product.id == p.id %}
+            {% assign product_match = true %}
+          {% endif %}
+        {% endif %}
+      {% elsif block.settings.target_product == blank %}
+        {% assign product_match = true %}
+      {% endif %}
+      
+      {% comment %} 2. Filter by collection {% endcomment %}
+      {% assign collection_match = false %}
+      {% if block.settings.target_collection != blank and p != blank %}
+        {% assign target_collection = collections[block.settings.target_collection] %}
+        {% if target_collection != blank %}
+          {% for collection_product in target_collection.products %}
+            {% if collection_product.handle == p.handle or collection_product.id == p.id %}
+              {% assign collection_match = true %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% elsif block.settings.target_collection == blank %}
+        {% assign collection_match = true %}
+      {% endif %}
+      
+      {% comment %} 3. Filter by tags {% endcomment %}
+      {% assign tags_match = false %}
+      {% if block.settings.required_tags != blank and p != blank %}
+        {% assign required_tags_array = block.settings.required_tags | split: ',' %}
+        {% assign has_all_tags = true %}
+        {% for tag in required_tags_array %}
+          {% assign tag_trimmed = tag | strip %}
+          {% unless p.tags contains tag_trimmed %}
+            {% assign has_all_tags = false %}
+            {% break %}
+          {% endunless %}
+        {% endfor %}
+        {% if has_all_tags %}
+          {% assign tags_match = true %}
+        {% endif %}
+      {% elsif block.settings.required_tags == blank %}
+        {% assign tags_match = true %}
+      {% endif %}
+      
+      {% comment %} 4. Filter by metafields {% endcomment %}
+      {% assign metafield_match = false %}
+      {% if block.settings.metafield_key != blank and p != blank %}
+        {% assign metafield_namespace = block.settings.metafield_namespace | default: 'custom' %}
+        {% assign product_metafield = p.metafields[metafield_namespace][block.settings.metafield_key] %}
+        {% if block.settings.metafield_value != blank %}
+          {% if product_metafield == block.settings.metafield_value %}
+            {% assign metafield_match = true %}
+          {% endif %}
+        {% elsif product_metafield != blank %}
+          {% assign metafield_match = true %}
+        {% endif %}
+      {% elsif block.settings.metafield_key == blank %}
+        {% assign metafield_match = true %}
+      {% endif %}
+      
+      {% comment %} 5. Combined logic (AND/OR) {% endcomment %}
+      {% if filter_type == 'all' %}
+        {% comment %} Show if ALL specified conditions are met {% endcomment %}
+        {% assign conditions_met = 0 %}
+        {% assign total_conditions = 0 %}
+        {% if block.settings.target_product != blank %}
+          {% assign total_conditions = total_conditions | plus: 1 %}
+          {% if product_match %}{% assign conditions_met = conditions_met | plus: 1 %}{% endif %}
+        {% endif %}
+        {% if block.settings.target_collection != blank %}
+          {% assign total_conditions = total_conditions | plus: 1 %}
+          {% if collection_match %}{% assign conditions_met = conditions_met | plus: 1 %}{% endif %}
+        {% endif %}
+        {% if block.settings.required_tags != blank %}
+          {% assign total_conditions = total_conditions | plus: 1 %}
+          {% if tags_match %}{% assign conditions_met = conditions_met | plus: 1 %}{% endif %}
+        {% endif %}
+        {% if block.settings.metafield_key != blank %}
+          {% assign total_conditions = total_conditions | plus: 1 %}
+          {% if metafield_match %}{% assign conditions_met = conditions_met | plus: 1 %}{% endif %}
+        {% endif %}
+        {% if total_conditions == 0 or conditions_met == total_conditions %}
+          {% assign show_accordion_block = true %}
+        {% endif %}
+      {% else %}
+        {% comment %} Show if ANY condition is met (default) {% endcomment %}
+        {% if product_match or collection_match or tags_match or metafield_match %}
+          {% assign show_accordion_block = true %}
+        {% endif %}
+      {% endif %}
+      
+      {% comment %} ===== END OF FILTERING LOGIC ===== {% endcomment %}
+      
+      {% comment %} Show the block ONLY if show_accordion_block is true {% endcomment %}
+      {% if show_accordion_block %}
+        {% comment %} Dynamic content from metafields {% endcomment %}
+        {% assign accordion_title = block.settings.title %}
+        {% assign accordion_content = block.settings.content %}
+        {% if block.settings.use_metafield_title and block.settings.title_metafield_key != blank and p != blank %}
+          {% assign title_namespace = block.settings.title_metafield_namespace | default: 'custom' %}
+          {% assign title_metafield = p.metafields[title_namespace][block.settings.title_metafield_key] %}
+          {% if title_metafield != blank %}
+            {% assign accordion_title = title_metafield %}
+          {% endif %}
+        {% endif %}
+        {% if block.settings.use_metafield_content and block.settings.content_metafield_key != blank and p != blank %}
+          {% assign content_namespace = block.settings.content_metafield_namespace | default: 'custom' %}
+          {% assign content_metafield = p.metafields[content_namespace][block.settings.content_metafield_key] %}
+          {% if content_metafield != blank %}
+            {% assign accordion_content = content_metafield %}
+          {% endif %}
+        {% endif %}
+        
+        {% comment %} Specific check for tech_specs metafield for the "Technical Specifications" block {% endcomment %}
+        {% assign is_tech_specs_block = false %}
+        {% if accordion_title contains 'Технически спецификации' or block.settings.title contains 'Технически спецификации' or block.settings.title contains 'Technical Specifications' %}
+          {% assign is_tech_specs_block = true %}
+        {% endif %}
+        
+        {% render 'pfc-accordion-item', block: block, accordion_title: accordion_title, accordion_content: accordion_content, is_tech_specs_block: is_tech_specs_block, product: product %}
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+

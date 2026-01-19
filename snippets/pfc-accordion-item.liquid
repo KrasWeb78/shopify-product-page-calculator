@@ -1,0 +1,25 @@
+<div class="pfc-accordion__item {% if block.settings.open_by_default %}is-open{% endif %}">
+  <button class="pfc-accordion__header" type="button" aria-expanded="{% if block.settings.open_by_default %}true{% else %}false{% endif %}">
+      <span>{{ accordion_title }}</span>
+    <svg class="pfc-accordion__icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="pfc-accordion__panel">
+    {% if is_tech_specs_block %}
+      {% assign tech_specs = product.metafields.custom.tech_specs %}
+      <div class="product-tech-accordion-content">
+        {% if tech_specs != blank %}
+          {{ tech_specs | metafield_tag }}
+        {% else %}
+          {{ block.settings.content }}
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="pfc-accordion__content rte">
+        {{ accordion_content }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+

@@ -1,0 +1,41 @@
+{% comment %}
+  Rendered by: pfc-metafields-desktop.liquid
+  This snippet displays upsell products slider from product metafields
+{% endcomment %}
+{% assign upsell_products_metafield = product.metafields.upsell.products %}
+{% assign upsell_products = blank %}
+
+{% comment %} Check the metafield in multiple ways - simplified logic {% endcomment %}
+{% if upsell_products_metafield != blank %}
+  {% if upsell_products_metafield.value != blank %}
+    {% assign upsell_products = upsell_products_metafield.value %}
+  {% elsif upsell_products_metafield != blank %}
+    {% assign upsell_products = upsell_products_metafield %}
+  {% endif %}
+{% endif %}
+
+{% comment %} Debug: upsell_products_metafield = {{ upsell_products_metafield != blank }}, upsell_products = {{ upsell_products != blank }}, size = {{ upsell_products.size }} {% endcomment %}
+
+{% comment %} Show the section if there are products - as a slider {% endcomment %}
+{% if upsell_products != blank %}
+  <section class="upsell-products" style="margin-top: 10px;">
+    <h3 class="upsell-products__title">Featured products</h3>
+    <div class="pfc-collection-slider">
+      <div class="pfc-collection-slider__wrapper" data-collection-slider>
+        <button class="pfc-collection-slider__arrow pfc-collection-slider__arrow--prev" type="button" data-collection-prev>‹</button>
+        <div class="pfc-collection-slider__track" data-collection-track>
+          {% comment %} Iterate over products - simplified logic {% endcomment %}
+      {% for upsell in upsell_products %}
+            {% comment %} Skip empty items {% endcomment %}
+            {% if upsell != blank %}
+        {% assign upsell_variant = upsell.selected_or_first_available_variant %}
+        {% render 'pfc-collection-card', product_item: upsell, current_variant_item: upsell_variant, button_label: 'Add to cart' %}
+            {% endif %}
+      {% endfor %}
+        </div>
+        <button class="pfc-collection-slider__arrow pfc-collection-slider__arrow--next" type="button" data-collection-next>›</button>
+      </div>
+    </div>
+  </section>
+{% endif %}
+

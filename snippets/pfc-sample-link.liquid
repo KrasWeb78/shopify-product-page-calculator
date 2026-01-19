@@ -1,0 +1,37 @@
+{% comment %}
+  Rendered by: product-card.liquid (section file)
+  This snippet displays the sample link and renders pfc-sample-box if needed
+  Sample logic: show a text link if there is a sample_product, and a black banner if sample_black_banner = true
+{% endcomment %}
+{% if sample_product != blank %}
+  {% comment %} Check the sample_black_banner metafield directly - simplest logic {% endcomment %}
+  {% assign sample_black_banner_check = product.metafields.custom.sample_black_banner %}
+  {% assign should_show_banner = false %}
+  
+  {% comment %} Check if the metafield exists and is not false - simplified logic {% endcomment %}
+  {% if sample_black_banner_check != blank and sample_black_banner_check != false %}
+    {% if sample_black_banner_check == true or sample_black_banner_check.value == true %}
+      {% assign should_show_banner = true %}
+    {% elsif sample_black_banner_check == 'true' or sample_black_banner_check == 'Wahr' or sample_black_banner_check == 'wahr' or sample_black_banner_check == 1 %}
+      {% assign should_show_banner = true %}
+    {% elsif sample_black_banner_check.value == 'true' or sample_black_banner_check.value == 'Wahr' or sample_black_banner_check.value == 'wahr' or sample_black_banner_check.value == 1 %}
+      {% assign should_show_banner = true %}
+    {% endif %}
+  {% endif %}
+  
+  <div class="pfc-sample-link" style="margin: 16px 0;">
+    {% if should_show_banner %}
+      {% comment %} If there is a black banner, the link scrolls to it {% endcomment %}
+      <a href="#sample-box-{{ section.id }}" class="pfc-sample-link__text" style="color: inherit; text-decoration: underline; cursor: pointer;" data-scroll-to="sample">
+        Order sample
+      </a>
+    {% else %}
+      {% comment %} If there is no black banner, the link goes to the sample product {% endcomment %}
+    <a href="{{ sample_product.url }}" class="pfc-sample-link__text" style="color: inherit; text-decoration: underline;">
+      Order sample
+    </a>
+    {% endif %}
+  </div>
+
+  {% render 'pfc-sample-box', sample_product: sample_product, sample_limit: sample_limit, section: section, should_show_banner: should_show_banner %}
+{% endif %}

@@ -1,0 +1,58 @@
+{% comment %}
+  Gallery thumbnails
+  Variables: p, section
+{% endcomment %}
+<div class="pfc-gallery__thumbs-wrapper">
+  <button class="pfc-gallery__thumbs-nav pfc-gallery__thumbs-nav--prev" aria-label="Previous thumbnail">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+  <div class="pfc-gallery__thumbs">
+    {% if p != blank and p.media.size > 0 %}
+      {% for media in p.media limit: 8 %}
+        <button 
+          class="pfc-gallery__thumb {% if forloop.first %}is-active{% endif %}" 
+          data-image="{{ media.preview_image | image_url: width: 1024, format: 'webp' }}"
+          data-media-id="{{ media.id }}"
+          aria-label="Preview image {{ forloop.index }}"
+          {% if forloop.first %}aria-current="true"{% endif %}
+        >
+          <img 
+            src="{{ media.preview_image | image_url: width: 200, format: 'webp' }}" 
+            alt="{% if p != blank %}{{ p.title | escape }}{% else %}Thumbnail {{ forloop.index }}{% endif %}"
+            loading="lazy"
+            decoding="async"
+            width="200"
+            height="200"
+          >
+        </button>
+      {% endfor %}
+    {% elsif section.blocks.size > 0 %}
+      {% for block in section.blocks %}
+        {% if block.type == 'gallery_image' and block.settings.image != blank %}
+          <button 
+            class="pfc-gallery__thumb {% if forloop.first %}is-active{% endif %}" 
+            data-image="{{ block.settings.image | image_url: width: 1024, format: 'webp' }}"
+            aria-label="{{ block.settings.alt | default: 'Preview image' | escape }}"
+            {% if forloop.first %}aria-current="true"{% endif %}
+          >
+            <img 
+              src="{{ block.settings.image | image_url: width: 200, format: 'webp' }}" 
+              alt="{{ block.settings.alt | escape }}"
+              loading="lazy"
+              decoding="async"
+              width="200"
+              height="200"
+            >
+          </button>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  <button class="pfc-gallery__thumbs-nav pfc-gallery__thumbs-nav--next" aria-label="Next thumbnail">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+</div>

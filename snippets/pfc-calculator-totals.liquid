@@ -1,0 +1,68 @@
+<div class="pfc-complete-set__total">
+  <div class="pfc-complete-set__total-row">
+    <span>{{ section.settings.total_label | default: 'Total' }}:</span>
+    <div class="pfc-complete-set__total-prices">
+      {% if p != blank and current_variant != blank and current_variant.compare_at_price > current_variant.price %}
+        {% assign default_qty_val = section.settings.default_quantity | default: 10 %}
+        {% assign packages_default = default_qty_val | divided_by: calc_package_size | ceil %}
+        {% assign total_compare_cents = current_variant.compare_at_price | times: packages_default | round %}
+        <span class="pfc-complete-set__total-compare" id="pfc-total-compare-{{ section.id }}">
+          {% if section.settings.enable_currency_conversion and section.settings.show_eur_alongside_bgn %}
+            {% assign eur_rate = section.settings.eur_to_bgn_rate | default: "1.95583" | plus: 0.0 %}
+            {% assign total_compare_bgn = total_compare_cents | divided_by: 100.0 %}
+            {% assign total_compare_eur = total_compare_bgn | divided_by: eur_rate | round: 2 %}
+            {% assign eur_str = total_compare_eur | append: '' %}
+            {% if eur_str contains '.' %}
+              {% assign eur_parts = eur_str | split: '.' %}
+              {% assign dec = eur_parts[1] %}
+              {% if dec.size == 1 %}{% assign dec = dec | append: '0' %}{% endif %}
+              {% assign eur_str = eur_parts[0] | append: '.' | append: dec %}
+            {% else %}
+              {% assign eur_str = eur_str | append: '.00' %}
+            {% endif %}
+            <span class="pfc-price-eur">{{ eur_str }}€</span> / {{ total_compare_cents | money }}
+          {% else %}
+            {{ total_compare_cents | money }}
+          {% endif %}
+        </span>
+      {% endif %}
+      <span class="pfc-complete-set__total-current" id="pfc-total-{{ section.id }}">
+        {% if p != blank and current_variant != blank %}
+          {% comment %} Calculate package count for totals {% endcomment %}
+          {% assign default_qty_val = section.settings.default_quantity | default: 10 %}
+          {% assign packages_default = default_qty_val | divided_by: calc_package_size | ceil %}
+          {% assign total_cents = current_variant.price | times: packages_default | round %}
+          {% if section.settings.enable_currency_conversion and section.settings.show_eur_alongside_bgn %}
+            {% assign eur_rate = section.settings.eur_to_bgn_rate | default: "1.95583" | plus: 0.0 %}
+            {% assign total_bgn = total_cents | divided_by: 100.0 %}
+            {% assign total_eur = total_bgn | divided_by: eur_rate | round: 2 %}
+            {% assign eur_str = total_eur | append: '' %}
+            {% if eur_str contains '.' %}
+              {% assign eur_parts = eur_str | split: '.' %}
+              {% assign dec = eur_parts[1] %}
+              {% if dec.size == 1 %}{% assign dec = dec | append: '0' %}{% endif %}
+              {% assign eur_str = eur_parts[0] | append: '.' | append: dec %}
+            {% else %}
+              {% assign eur_str = eur_str | append: '.00' %}
+            {% endif %}
+            <span class="pfc-price-eur">{{ eur_str }}€</span> / {{ total_cents | money }}
+          {% else %}
+            {{ total_cents | money }}
+          {% endif %}
+        {% else %}
+          {{ section.settings.manual_total | default: '307.32€' }}
+        {% endif %}
+      </span>
+    </div>
+  </div>
+  {% if p != blank and current_variant != blank and current_variant.compare_at_price > current_variant.price %}
+    <div class="pfc-complete-set__total-savings" id="pfc-total-savings-{{ section.id }}">
+      {% assign default_qty_val = section.settings.default_quantity | default: 10 %}
+      {% assign packages_default = default_qty_val | divided_by: calc_package_size | ceil %}
+      {% assign savings_per_unit = current_variant.compare_at_price | minus: current_variant.price %}
+      {% assign savings_total_cents = savings_per_unit | times: packages_default | round %}
+      {{ savings_total_cents | money }} {{ section.settings.saved_label | default: 'saved' }}
+    </div>
+  {% endif %}
+</div>
+

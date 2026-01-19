@@ -1,0 +1,28 @@
+{% comment %}
+  Gallery action buttons (sample/virtual)
+  Variables: section, sample_product, show_calculator_flag
+{% endcomment %}
+{% comment %} Show buttons only if the related sections exist {% endcomment %}
+{% assign show_sample_btn = false %}
+{% assign show_virtual_btn = false %}
+{% if section.settings.show_sample_button and sample_product != blank and sample_product.available %}
+  {% assign show_sample_btn = true %}
+{% endif %}
+{% if section.settings.show_virtual_button and show_calculator_flag %}
+  {% assign show_virtual_btn = true %}
+{% endif %}
+{% if show_sample_btn or show_virtual_btn %}
+  <div class="pfc-action-buttons">
+    {% if show_sample_btn %}
+      <a href="#" class="pfc-btn pfc-btn--sample" data-scroll-to="sample">
+        {{ section.settings.sample_button_label | default: 'Order free sample' }}
+      </a>
+    {% endif %}
+    {% if show_virtual_btn %}
+      <a href="#" class="pfc-btn pfc-btn--virtual" data-scroll-to="calculator">
+        {{ section.settings.virtual_button_label | default: 'Virtually lay flooring' }}
+      </a>
+    {% endif %}
+  </div>
+{% endif %}
+

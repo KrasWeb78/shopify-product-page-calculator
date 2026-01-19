@@ -1,0 +1,57 @@
+{% comment %}
+  Rendered by:
+  - pfc-upsell-slider.liquid (line 32)
+  - product-card.liquid (line 159, in product_category block)
+  This snippet renders a single product card for collection sliders.
+{% endcomment %}
+<article class="pfc-collection-card">
+  <a href="{{ product_item.url }}" class="pfc-collection-card__image-link">
+    {% if product_item.featured_image %}
+      <div class="pfc-collection-card__image-wrapper">
+        {{ product_item.featured_image | image_url: width: 400 | image_tag: loading: 'lazy', decoding: 'async', class: 'pfc-collection-card__image' }}
+        {% unless current_variant_item.available %}
+          <div class="pfc-collection-card__badge pfc-collection-card__badge--sold-out">Sold out</div>
+        {% endunless %}
+      </div>
+    {% endif %}
+  </a>
+  <div class="pfc-collection-card__body">
+    <h4 class="pfc-collection-card__title">
+      <a href="{{ product_item.url }}">{{ product_item.title }}</a>
+    </h4>
+    <div class="pfc-collection-card__price-wrapper">
+      {% if current_variant_item.compare_at_price > current_variant_item.price %}
+        <span class="pfc-collection-card__price-compare">{{ current_variant_item.compare_at_price | money }}</span>
+      {% endif %}
+      <span class="pfc-collection-card__price">{{ current_variant_item.price | money }}</span>
+    </div>
+    {% if current_variant_item.available %}
+      <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data" class="pfc-collection-card__form">
+        <input type="hidden" name="id" value="{{ current_variant_item.id }}">
+        <div class="pfc-collection-card__qty-wrapper">
+          <div class="pfc-collection-card__qty-controls">
+            <button type="button" class="pfc-collection-card__qty-btn" data-action="decrease" aria-label="Decrease">−</button>
+            <input 
+              type="number" 
+              name="quantity" 
+              value="1" 
+              min="1" 
+              step="1"
+              class="pfc-collection-card__qty-input"
+              aria-label="Quantity"
+            >
+            <button type="button" class="pfc-collection-card__qty-btn" data-action="increase" aria-label="Increase">+</button>
+          </div>
+        </div>
+        <button type="submit" class="pfc-collection-card__btn">
+          {{ button_label | default: 'Add to cart' }}
+        </button>
+      </form>
+    {% else %}
+      <a href="{{ product_item.url }}" class="pfc-collection-card__btn pfc-collection-card__btn--disabled">
+        Sold out
+      </a>
+    {% endif %}
+  </div>
+</article>
+

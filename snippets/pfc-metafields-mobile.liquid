@@ -1,0 +1,130 @@
+{% comment %} Metafields in pfc-info - shown ONLY on mobile devices, between delivery and sample-link {% endcomment %}
+{% if p != blank %}
+  {% assign metafield_blocks = section.blocks | where: 'type', 'metafield' %}
+  {% assign has_metafields = false %}
+  {% if section.settings.auto_show_all_metafields %}
+    {% assign has_metafields = true %}
+  {% elsif metafield_blocks.size > 0 %}
+    {% assign has_metafields = true %}
+  {% endif %}
+  
+  {% if has_metafields or section.settings.show_metafields %}
+  <div class="pfc-metafields pfc-metafields--mobile-only" id="pfc-metafields-mobile-{{ section.id }}">
+    {% if section.settings.auto_show_all_metafields %}
+      {% assign show_empty = section.settings.show_empty_metafields %}
+      {% assign empty_text = section.settings.empty_metafield_text | default: '—' %}
+      
+      {% assign specs_keys = 'key_features,free_sample,compare_enabled,bevel,waterproof,floor_heating,uv_resistant,plank_width,plank_length,m2_per_pack,manufacturer,surface,integrated_underlay,class,wear_layer,thickness' | split: ',' %}
+      {% assign specs_labels = 'Key features,Free sample,Compare flooring,Decorative bevel,Waterproof,Underfloor heating,UV resistant,Plank width (cm),Plank length (cm),m² per pack,Manufacturer,Surface / Finish,Integrated underlay,Wear class,Wear layer (mm),Thickness (mm)' | split: ',' %}
+      
+      {% for key in specs_keys %}
+        {% assign index = forloop.index0 %}
+        {% assign namespace_key = 'specs.' | append: key %}
+        {% assign metafield_obj = p.metafields[namespace_key] %}
+        {% if metafield_obj == blank %}
+          {% assign metafield_obj = p.metafields.specs[key] %}
+        {% endif %}
+        {% assign metafield_display = blank %}
+        {% if metafield_obj != blank %}
+          {% if metafield_obj.value != blank %}
+            {% assign metafield_display = metafield_obj.value %}
+          {% elsif metafield_obj != blank %}
+            {% assign metafield_display = metafield_obj %}
+          {% endif %}
+        {% endif %}
+        {% if metafield_display != blank or show_empty %}
+          {% assign metafield_type = metafield_obj.type | default: '' %}
+          <div class="pfc-metafield {% unless metafield_display != blank %}pfc-metafield--empty{% endunless %}">
+            <span class="pfc-metafield__label">{{ specs_labels[index] }}:</span>
+            <span class="pfc-metafield__value">
+              {% if metafield_display != blank %}
+                {% if metafield_type == 'boolean' or metafield_type == 'boolean_true_false' %}
+                  {% if metafield_display == true or metafield_display == 'true' or metafield_display == 'Wahr' %}
+                    Yes
+                  {% else %}
+                    No
+                  {% endif %}
+                {% else %}
+                  {{ metafield_display }}
+                {% endif %}
+              {% else %}
+                <span class="pfc-metafield__empty">{{ empty_text }}</span>
+              {% endif %}
+            </span>
+          </div>
+        {% endif %}
+      {% endfor %}
+      
+      {% assign custom_keys = 'aktions_badge,lieferzeit_status,b2b_preis' | split: ',' %}
+      {% assign custom_labels = 'Promotion badge / Label,Delivery time / Status,B2B price' | split: ',' %}
+      
+      {% for key in custom_keys %}
+        {% assign index = forloop.index0 %}
+        {% assign namespace_key = 'custom.' | append: key %}
+        {% assign metafield_obj = p.metafields[namespace_key] %}
+        {% if metafield_obj == blank %}
+          {% assign metafield_obj = p.metafields.custom[key] %}
+        {% endif %}
+        {% assign metafield_display = blank %}
+        {% if metafield_obj != blank %}
+          {% if metafield_obj.value != blank %}
+            {% assign metafield_display = metafield_obj.value %}
+          {% elsif metafield_obj != blank %}
+            {% assign metafield_display = metafield_obj %}
+          {% endif %}
+        {% endif %}
+        {% if metafield_display != blank or show_empty %}
+          <div class="pfc-metafield {% unless metafield_display != blank %}pfc-metafield--empty{% endunless %}">
+            <span class="pfc-metafield__label">{{ custom_labels[index] }}:</span>
+            <span class="pfc-metafield__value">
+              {% if metafield_display != blank %}
+                {{ metafield_display }}
+              {% else %}
+                <span class="pfc-metafield__empty">{{ empty_text }}</span>
+              {% endif %}
+            </span>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    
+    {% if metafield_blocks.size > 0 %}
+      {% for block in metafield_blocks %}
+        {% assign metafield_namespace = block.settings.namespace | default: 'custom' %}
+        {% assign metafield_key = block.settings.key %}
+        {% if metafield_key != blank %}
+          {% assign metafield_value = p.metafields[metafield_namespace][metafield_key] %}
+          {% assign show_empty = block.settings.show_empty | default: false %}
+          {% if metafield_value != blank or show_empty %}
+            <div class="pfc-metafield {% unless metafield_value != blank %}pfc-metafield--empty{% endunless %}" {{ block.shopify_attributes }}>
+              {% if block.settings.label != blank %}
+                <span class="pfc-metafield__label">{{ block.settings.label }}:</span>
+              {% endif %}
+              <span class="pfc-metafield__value">
+                {% if metafield_value.media_type == 'image' or metafield_value.type == 'file_reference' %}
+                  {% if metafield_value.alt %}
+                    <img src="{{ metafield_value | image_url: width: 200 }}" alt="{{ metafield_value.alt }}" loading="lazy" decoding="async" width="200" height="200">
+                  {% else %}
+                    <img src="{{ metafield_value | image_url: width: 200 }}" alt="" loading="lazy" decoding="async" width="200" height="200">
+                  {% endif %}
+                {% elsif metafield_value.type == 'rich_text' or metafield_value.type == 'multi_line_text_field' %}
+                  {{ metafield_value | metafield_tag }}
+                {% elsif metafield_value.type == 'url' %}
+                  <a href="{{ metafield_value }}" target="_blank" rel="noopener">{{ metafield_value }}</a>
+                  {% else %}
+                  {% if metafield_value.value != blank %}
+                    {{ metafield_value.value }}
+                  {% else %}
+                    {{ metafield_value }}
+                  {% endif %}
+                {% endif %}
+              </span>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+  {% endif %}
+{% endif %}
+

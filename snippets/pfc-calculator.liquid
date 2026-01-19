@@ -1,0 +1,288 @@
+{% comment %} Product-level custom settings via metafields {% endcomment %}
+{% assign calc_package_size = section.settings.package_size | default: 2.196 | plus: 0 %}
+{% if p.metafields.custom.calculator_package_size != blank %}
+  {% assign calc_package_size = p.metafields.custom.calculator_package_size.value | default: p.metafields.custom.calculator_package_size | plus: 0 %}
+{% endif %}
+
+{% assign calc_waste_percent = section.settings.waste_percent | default: 5 %}
+{% if p.metafields.custom.calculator_waste_percent != blank %}
+  {% assign calc_waste_percent = p.metafields.custom.calculator_waste_percent.value | default: p.metafields.custom.calculator_waste_percent | plus: 0 %}
+{% endif %}
+
+{% assign calc_default_quantity = section.settings.default_quantity | default: 10 %}
+{% if p.metafields.custom.calculator_default_quantity != blank %}
+  {% assign calc_default_quantity = p.metafields.custom.calculator_default_quantity.value | default: p.metafields.custom.calculator_default_quantity | plus: 0 %}
+{% endif %}
+
+{% assign calc_quantity_step = section.settings.quantity_step | default: 1 %}
+{% if p.metafields.custom.calculator_quantity_step != blank %}
+  {% assign calc_quantity_step = p.metafields.custom.calculator_quantity_step.value | default: p.metafields.custom.calculator_quantity_step | plus: 0 %}
+{% endif %}
+
+{% assign calc_min_quantity = section.settings.min_quantity | default: 1 %}
+{% if p.metafields.custom.calculator_min_quantity != blank %}
+  {% assign calc_min_quantity = p.metafields.custom.calculator_min_quantity.value | default: p.metafields.custom.calculator_min_quantity | plus: 0 %}
+{% endif %}
+
+{% assign calc_unit_label = section.settings.unit_label | default: 'm²' %}
+{% if p.metafields.custom.calculator_unit_label != blank %}
+  {% assign calc_unit_label = p.metafields.custom.calculator_unit_label.value | default: p.metafields.custom.calculator_unit_label %}
+{% endif %}
+
+<div data-calculator-block>
+  <div class="pfc-complete-set">
+    {% if section.settings.show_savings_badge %}
+      <div class="pfc-complete-set__savings" id="pfc-savings-{{ section.id }}" 
+           style="background: {{ section.settings.savings_badge_bg | default: '#dc2626' }};
+                  color: {{ section.settings.savings_badge_text | default: '#fff' }};
+                  font-size: {{ section.settings.savings_badge_font_size | default: '14' }}px;
+                  padding: {{ section.settings.savings_badge_padding | default: '8' }}px {{ section.settings.savings_badge_padding_horizontal | default: '12' }}px;
+                  border-radius: {{ section.settings.savings_badge_border_radius | default: '8' }}px;
+                  text-align: {{ section.settings.savings_badge_align | default: 'center' }};
+                  {% if section.settings.savings_badge_custom_css != blank %}{{ section.settings.savings_badge_custom_css }}{% endif %}">
+        {% if p != blank and current_variant != blank and current_variant.compare_at_price > current_variant.price %}
+          {% assign savings_amount = current_variant.compare_at_price | minus: current_variant.price %}
+          {% assign savings_percent = savings_amount | times: 100.0 | divided_by: current_variant.compare_at_price | round %}
+          {% assign format_text = section.settings.savings_badge_format | default: '' %}
+          {% if format_text != blank and format_text != 'LABEL_PLACEHOLDER PERCENT_PLACEHOLDER%' %}
+            {% assign formatted_text = format_text %}
+            {% assign formatted_text = formatted_text | replace: 'LABEL_PLACEHOLDER', section.settings.savings_label | default: 'You save' %}
+            {% assign formatted_text = formatted_text | replace: 'PERCENT_PLACEHOLDER', savings_percent %}
+            {{ formatted_text }}
+          {% else %}
+            {{ section.settings.savings_label | default: 'You save' }} {{ savings_percent }}%
+          {% endif %}
+        {% elsif section.settings.manual_savings_percent != blank %}
+          {% assign format_text = section.settings.savings_badge_format | default: '' %}
+          {% if format_text != blank and format_text != 'LABEL_PLACEHOLDER PERCENT_PLACEHOLDER%' %}
+            {% assign formatted_text = format_text %}
+            {% assign formatted_text = formatted_text | replace: 'LABEL_PLACEHOLDER', section.settings.savings_label | default: 'You save' %}
+            {% assign formatted_text = formatted_text | replace: 'PERCENT_PLACEHOLDER', section.settings.manual_savings_percent %}
+            {{ formatted_text }}
+          {% else %}
+            {{ section.settings.savings_label | default: 'You save' }} {{ section.settings.manual_savings_percent }}%
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% render 'pfc-calculator-pricing', p: p, section: section, current_variant: current_variant, calc_package_size: calc_package_size, calc_unit_label: calc_unit_label %}
+
+    <div class="pfc-complete-set__qty">
+      <label for="pfc-qty-m2-{{ section.id }}" class="pfc-complete-set__qty-label">
+        {{ section.settings.quantity_label | default: 'Quantity' }} ({{ calc_unit_label }})
+      </label>
+      <div class="pfc-qty-controls">
+        <button type="button" class="pfc-qty-btn" data-action="decrease" data-target="m2" aria-label="Decrease">−</button>
+        <input 
+          type="number" 
+          id="pfc-qty-m2-{{ section.id }}"
+          name="quantity_m2" 
+          value="{{ calc_default_quantity }}" 
+          min="{{ calc_min_quantity }}"
+          step="{{ calc_quantity_step }}"
+          class="pfc-qty-input"
+          data-unit="m2"
+          inputmode="numeric"
+        >
+        <button type="button" class="pfc-qty-btn" data-action="increase" data-target="m2" aria-label="Increase">+</button>
+      </div>
+      <div class="pfc-qty-info">
+        Enter the square meters of your room and the system will automatically calculate how many packages are needed.
+      </div>
+      {% if section.settings.show_package_calculation %}
+        {% comment %} Use the same value for calculations and display {% endcomment %}
+        {% assign calc_display_package_size = calc_package_size %}
+        {% if current_variant != blank and current_variant.metafields.custom.calculator_package_size != blank %}
+          {% assign calc_display_package_size = current_variant.metafields.custom.calculator_package_size.value | default: current_variant.metafields.custom.calculator_package_size | plus: 0 %}
+        {% endif %}
+        <div class="pfc-complete-set__packages" id="pfc-packages-{{ section.id }}">
+          {% assign packages = calc_default_quantity | divided_by: calc_display_package_size | ceil %}
+          {% assign real_m2 = packages | times: calc_display_package_size %}
+          <span>{{ packages }} {{ section.settings.package_label | default: 'Packages' }}</span>
+        </div>
+        <div class="pfc-complete-set__roof-area" id="pfc-roof-area-{{ section.id }}">
+          <span>Coverage area: <span id="pfc-roof-area-value-{{ section.id }}">{{ real_m2 | round: 2 }}</span> m²</span>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if section.settings.show_waste_option %}
+      <div class="pfc-complete-set__waste">
+        <label class="pfc-waste-checkbox">
+          <input type="checkbox" id="pfc-waste-{{ section.id }}" data-waste-percent="{{ calc_waste_percent }}">
+          <span>{{ section.settings.waste_label | default: '5% waste' }}</span>
+          {% assign waste_info_text = section.settings.waste_info | default: 'Waste is extra material for cutting and defects.' %}
+          <span class="pfc-waste-info" title="{{ waste_info_text }}">
+          ℹ️
+            <span class="pfc-waste-tooltip">{{ waste_info_text }}</span>
+          </span>
+        </label>
+      </div>
+    {% endif %}
+
+    {% if section.settings.show_package_details %}
+      <div class="pfc-complete-set__package-details">
+        {% assign display_package_size = calc_package_size %}
+        {% if current_variant != blank and current_variant.metafields.custom.calculator_package_size != blank %}
+          {% assign display_package_size = current_variant.metafields.custom.calculator_package_size.value | default: current_variant.metafields.custom.calculator_package_size | plus: 0 %}
+        {% endif %}
+        {% assign rounded = display_package_size | times: 1000.0 | round | divided_by: 1000.0 %}
+        {% assign rounded_str = rounded | round: 3 %}
+        {% assign size_with_dot = rounded_str | append: '.000' %}
+        {% assign parts = size_with_dot | split: '.' %}
+        {% assign int_part = parts[0] %}
+        {% assign dec_raw = parts[1] %}
+        {% if dec_raw.size == 1 %}
+          {% assign dec_part = dec_raw | append: '00' %}
+        {% elsif dec_raw.size == 2 %}
+          {% assign dec_part = dec_raw | append: '0' %}
+        {% elsif dec_raw.size > 3 %}
+          {% assign dec_part = dec_raw | slice: 0, 3 %}
+        {% else %}
+          {% assign dec_part = dec_raw %}
+        {% endif %}
+        {% assign formatted_package_size = int_part | append: ',' | append: dec_part %}
+        {{ section.settings.package_content_label | default: 'Package content' }} <span id="pfc-package-content-{{ section.id }}"></span><span id="pfc-package-size-{{ section.id }}">{{ formatted_package_size }}</span> {{ calc_unit_label }} | 
+        {{ section.settings.package_price_label | default: 'Package price' }} 
+        <span id="pfc-package-price-{{ section.id }}">
+          {% if p != blank and current_variant != blank %}
+            {% if section.settings.enable_currency_conversion and section.settings.show_eur_alongside_bgn %}
+              {% assign eur_rate = section.settings.eur_to_bgn_rate | default: "1.95583" | plus: 0.0 %}
+              {% assign package_price_bgn = current_variant.price | divided_by: 100.0 %}
+              {% assign package_price_eur = package_price_bgn | divided_by: eur_rate | round: 2 %}
+              {% assign eur_str = package_price_eur | append: '' %}
+              {% if eur_str contains '.' %}
+                {% assign eur_parts = eur_str | split: '.' %}
+                {% assign dec = eur_parts[1] %}
+                {% if dec.size == 1 %}{% assign dec = dec | append: '0' %}{% endif %}
+                {% assign eur_str = eur_parts[0] | append: '.' | append: dec %}
+              {% else %}
+                {% assign eur_str = eur_str | append: '.00' %}
+              {% endif %}
+              <span class="pfc-price-eur">{{ eur_str }}€</span> / {{ current_variant.price | money }}
+            {% else %}
+              {{ current_variant.price | money }}
+            {% endif %}
+          {% else %}
+            {{ section.settings.manual_package_price | default: '61.46€' }}
+          {% endif %}
+        </span>
+      </div>
+    {% endif %}
+
+    {% render 'pfc-calculator-totals', p: p, section: section, current_variant: current_variant, calc_package_size: calc_package_size %}
+
+    {% comment %} Static promotional add-on block - shown based on show_promotional_addon_flag {% endcomment %}
+    {% if show_promotional_addon_flag and is_sample == false %}
+      {% assign promo_product = product.metafields.custom.promo_product.value %}
+      {% if promo_product != blank %}
+        <div class="pfc-complete-set__promo-addons">
+          <div class="pfc-promo-addon">
+                  {% assign promo_variant = promo_product.selected_or_first_available_variant %}
+            {% assign promo_title = product.metafields.custom.promo_title.value | default: promo_product.title %}
+            {% assign promo_quantity = product.metafields.custom.promo_quantity.value | default: 1 %}
+            {% assign promo_button_label = product.metafields.custom.promo_button_label.value | default: 'Add to cart' %}
+            
+            {% if promo_product.featured_image != blank %}
+                      <div class="pfc-promo-addon__image">
+                        <img src="{{ promo_product.featured_image | image_url: width: 100 }}" alt="{{ promo_title | escape }}" loading="lazy" decoding="async" width="100" height="100">
+                      </div>
+                    {% endif %}
+                    <div class="pfc-promo-addon__content">
+                      <div class="pfc-promo-addon__label">{{ section.settings.promo_label | default: 'Promotion' }}:</div>
+                      <div class="pfc-promo-addon__title">{{ promo_title }}</div>
+                      <div class="pfc-promo-addon__price-wrapper">
+                        <span class="pfc-promo-addon__price">{{ promo_variant.price | money }}</span>
+                      </div>
+                      {% if promo_variant.available %}
+                        <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data" class="pfc-promo-addon__form">
+                          <input type="hidden" name="id" value="{{ promo_variant.id }}">
+                          <div class="pfc-promo-addon__qty-wrapper">
+                            <div class="pfc-promo-addon__qty-controls">
+                              <button type="button" class="pfc-promo-addon__qty-btn" data-action="decrease" aria-label="Decrease">−</button>
+                              <input 
+                                type="number" 
+                                name="quantity" 
+                        value="{{ promo_quantity }}" 
+                                min="1" 
+                                step="1"
+                                class="pfc-promo-addon__qty-input"
+                                aria-label="Quantity"
+                              >
+                              <button type="button" class="pfc-promo-addon__qty-btn" data-action="increase" aria-label="Increase">+</button>
+                            </div>
+                          </div>
+                          <button type="submit" class="pfc-promo-addon__btn">
+                    {{ promo_button_label }}
+                          </button>
+                        </form>
+                      {% else %}
+                        <div class="pfc-promo-addon__unavailable">Sold out</div>
+                      {% endif %}
+                    </div>
+                  </div>
+        </div>
+      {% endif %}
+    {% endif %}
+
+    {% comment %} Static add-on category block - always in the template, reads from metafields {% endcomment %}
+    {% if show_category_block_flag %}
+      {% assign category_title = product.metafields.custom.category_title.value %}
+      {% assign category_link = product.metafields.custom.category_link.value %}
+      {% assign category_button_label = product.metafields.custom.category_button_label.value | default: 'Select' %}
+      
+      {% if category_title != blank %}
+        <div class="pfc-complete-set__addon-categories">
+          <div class="pfc-addon-category">
+              <div class="pfc-addon-category__title">{{ category_title }}</div>
+            {% if category_link != blank %}
+              <a href="{{ category_link }}" class="pfc-addon-category__btn">
+                {{ category_button_label }}
+              </a>
+            {% endif %}
+          </div>
+      </div>
+      {% endif %}
+    {% endif %}
+
+    {% if section.settings.show_request_offer %}
+      <button type="button" class="pfc-btn pfc-btn--request-offer" onclick="window.location.href='{{ section.settings.request_offer_link }}'">
+        {{ section.settings.request_offer_label | default: 'Request offer' }}
+      </button>
+    {% endif %}
+
+    <form 
+      action="{{ routes.cart_add_url }}" 
+      method="post" 
+      enctype="multipart/form-data" 
+      class="pfc-form pfc-form-complete-set" 
+      id="pfc-form-complete-{{ section.id }}"
+      data-section-id="{{ section.id }}"
+    >
+      {% if p != blank and current_variant != blank %}
+        <input type="hidden" name="id" value="{{ current_variant.id }}" id="pfc-variant-id-complete-{{ section.id }}">
+        <input type="hidden" name="quantity" value="{{ calc_default_quantity }}" id="pfc-qty-complete-{{ section.id }}">
+        
+        <button 
+          type="submit" 
+          class="pfc-btn pfc-btn--primary pfc-btn--full"
+          id="pfc-add-to-cart-complete-{{ section.id }}"
+          {% unless current_variant.available %}disabled{% endunless %}
+        >
+          {% if current_variant.available %}
+            {{ section.settings.cta_label | default: 'Add to cart' }}
+          {% else %}
+            {{ section.settings.sold_out_label | default: 'Sold out' }}
+          {% endif %}
+        </button>
+      {% else %}
+        <a href="{{ section.settings.cta_link | default: '#' }}" class="pfc-btn pfc-btn--primary pfc-btn--full">
+          {{ section.settings.cta_label | default: 'Add to cart' }}
+        </a>
+      {% endif %}
+    </form>
+
+  </div>
+</div>
+

@@ -1,0 +1,54 @@
+{% comment %}
+  Main gallery block
+  Variables: p, section
+{% endcomment %}
+<div class="pfc-gallery__main">
+  {% if p != blank and p.featured_image %}
+    {% assign main_image = p.featured_image %}
+  {% elsif section.settings.placeholder_image != blank %}
+    {% assign main_image = section.settings.placeholder_image %}
+  {% else %}
+    {% assign main_image = 'product-1' | placeholder_svg_tag: 'pfc-gallery__placeholder' %}
+  {% endif %}
+  {% if main_image != blank %}
+    {% if main_image contains 'placeholder' %}
+      {{ main_image }}
+    {% else %}
+      <div class="pfc-gallery__main-wrapper">
+        {% if section.settings.image_badge_text != blank %}
+          <div class="pfc-image-badge">{{ section.settings.image_badge_text }}</div>
+        {% endif %}
+        <button class="pfc-gallery__zoom-btn" aria-label="Zoom image">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/>
+            <path d="M20 20L16 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="pfc-gallery__nav-btn pfc-gallery__nav-btn--prev" aria-label="Previous image">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="pfc-gallery__nav-btn pfc-gallery__nav-btn--next" aria-label="Next image">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <img 
+          class="pfc-gallery__main-img" 
+          src="{{ main_image | image_url: width: 1024, format: 'webp' }}" 
+          srcset="{{ main_image | image_url: width: 512, format: 'webp' }} 512w, {{ main_image | image_url: width: 1024, format: 'webp' }} 1024w, {{ main_image | image_url: width: 2048, format: 'webp' }} 2048w"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 1024px"
+          alt="{% if p != blank %}{{ p.title | escape }}{% else %}{{ section.settings.custom_title | escape }}{% endif %}"
+          loading="eager"
+          fetchpriority="high"
+          decoding="async"
+          id="pfc-main-img-{{ section.id }}"
+          width="1024"
+          height="1024"
+        >
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+
