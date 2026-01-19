@@ -90,3 +90,13 @@ Common section settings used across the components:
 ## License
 MIT
 
+## Target Audience
+
+This project is intended for:
+
+- Shopify developers working on product-focused themes
+- Shopify agencies building reusable, modular components
+- Technical Product Owners in e-commerce
+- Teams aiming to deliver performant product pages without external dependencies
+
+
