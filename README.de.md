@@ -74,3 +74,12 @@ Wichtige Section-Settings, die von den Snippets genutzt werden:
 - Metafields: `show_metafields`, `auto_show_all_metafields`, `show_empty_metafields`, `empty_metafield_text`.
 - Währungsumrechnung: `enable_currency_conversion`, `show_eur_alongside_bgn`, `eur_to_bgn_rate`.
 
+## Zielgruppe
+
+Dieses Projekt richtet sich an:
+
+- Shopify-Entwickler:innen
+- Shopify-Agenturen
+- Technische Product Owner im E-Commerce
+- Teams, die modulare, performante Product Pages umsetzen wollen
+
